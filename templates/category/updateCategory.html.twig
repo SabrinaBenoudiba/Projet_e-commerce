@@ -4,13 +4,8 @@
     <div class="container">
         <div class="row">
             {#Affichage d'un message flash#}
-                {% for message in app.flashes('notice')%}
-                    <div class="alert alert-success">
-                        {{message}}
-                    </div>
-                {% endfor %}
-
-
+                {% include 'layouts/flash_message.html.twig'%}
+                
             {#Affichage du formulaire#}
                 <h1 class="mt-5 mb-5">Modification de l'article</h1>
                 <div class="col-d-6 offset-md-3">
