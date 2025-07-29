@@ -2,20 +2,24 @@
 
 {% block body %}
     <div class="container">
-        <div class="form">
+        <div class="row">
             <h2>Mes Catégories</h2>
             {#Affichage d'un message flash#}
             {% include 'layouts/flash_message.html.twig'%}
-            <div class="card-body">
                 {# {{ dump(categories) }} #}
                 {% for categories in categories %} 
 
-                <p>{{ (categories.name) }}</p>
-                    <a href="{{ path('app_category_update',{'id': categories.id}) }}" class="btn btn-warning">Modifier</a>
-                    <a href="{{ path('app_delete',{'id': categories.id}) }}" class="btn btn-danger">Supprimer</a>
-                    
+                    <div class="card col-3 m-3 d-flex" style="width: 18rem;">
+                        {# <img src="..." class="card-img-top" alt="..."> #}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ (categories.name) }}</h5>
+                            {# <p class="card-text">Description ou pas (à voir)</p> #}
+                            <a href="{{ path('app_category_update',{'id': categories.id}) }}" class="btn btn-warning">Modifier</a>
+                            <a href="{{ path('app_delete',{'id': categories.id}) }}" class="btn btn-danger">Supprimer</a>
+                        </div>
+                    </div>
+                       
                 {% endfor %}   
-            </div>
             <div>
                 <a href="{{ path('app_category_new') }}" class="btn btn-primary">Ajout d'une catégorie</a>
             </div>  
