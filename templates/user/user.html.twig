@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Utilisateurs{% endblock %}
+
+{% block body %}
+
+<h2> Liste des utilisateurs </h2>
+
+<div class="container">
+    <table class="table">
+        <tr>
+            <th>Id</th>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>eMail</th>
+            <th>Rôle</th>
+            <th>Action</th>
+        </tr>
+    {% for user in users %}
+        <tr>
+            <td>{{ (user.id) }}</td>
+            <td>{{ (user.firstName) }}</td>
+            <td>{{ (user.lastName) }}</td>
+            <td>{{ (user.eMail) }}</td>
+            <td>
+                {% for role in user.roles %}
+                    {{ role }}
+                {% endfor %}
+                
+            </td>
+            <td>
+            {% if ('ROLE_ADMIN' in user.roles) == false %}
+                {% if ('ROLE_EDITOR' in user.roles) == false %} 
+                    <a onclick= "return confirm('Voulez vous vraiment affecter ce rôle à cet utilisateur ?')" class="btn btn-outline-primary" href="{{ path ('app_user_update_role', {'id' :user.id}) }}" >Ajouter le rôle éditeur</a>
+                {% else %}
+                    <a onclick= "return confirm('Voulez vous vraiment retirer ce rôle à cet utilisateur ?')" href="{{ path ('app_user_delete_role', {'id' :user.id}) }}" class="btn btn-outline-danger">Retirer le rôle éditeur</a>
+                {% endif %}
+                <a onclick= "return confirm('Voulez vous vraiment supprimer cet utilisateur ?')" href="" class="btn btn-danger">Supprimer</a>
+            {% endif %}
+                
+                
+                
+            </td>
+        </tr>
+    
+        
+    {% endfor %}
+    
+    </table>
+
+
+</div>
+
+{% endblock %}
