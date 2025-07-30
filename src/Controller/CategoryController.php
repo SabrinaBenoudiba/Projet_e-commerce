@@ -13,7 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class CategoryController extends AbstractController
 {
-    #[Route('admin/category', name: 'app_category')]
+    #[Route('admin/category', name: 'app_category')] 
     public function category(CategoryRepository $repo): Response
     {
         $categories = $repo->findAll();
@@ -26,24 +26,29 @@ final class CategoryController extends AbstractController
         ]);
     }
 
-    #[Route('admin/category/new', name: 'app_category_new')]
-    public function addCategory(EntityManagerInterface $entityManager, Request $request): Response
+    #[Route('admin/category/new', name: 'app_category_new')]  //Déclaration d'une route accessible via l'url admin/category/new
+
+    //Méthode du controller qui gère la création d'une nouvelle catégorie
+    //Elle a pour paramètre le gestionnaire d'entité EntityManagerIntreface pour la bdd et la requête http et elle renvoie une réponse
+    public function addCategory(EntityManagerInterface $entityManager, Request $request): Response 
+    
     {
-        $category = new Category();
+        $category = new Category(); //Création d'une nouvelle instance de l'entity catégory
 
-        $form =$this->createForm(CategoryFormType::class, $category);
-        $form->handleRequest($request);
+        
+        $form =$this->createForm(CategoryFormType::class, $category); //Création d'un formulaire basé sur la classe CategoryFormType, lié à mon objet category ($category)
+        $form->handleRequest($request); //Traite les données envoyées dans la requête pour remplir le formulaire
 
-        if($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($category);
-            $entityManager->flush();
+        if($form->isSubmitted() && $form->isValid()) { //Vérifie si le formulaire est soumis et si les données sont valides
+            $entityManager->persist($category); //Prépare l'objet category de ma variable pour être envoyé en bdd
+            $entityManager->flush(); //Exécute la requête d'insertion en bdd, ça sauvegarde ma category
 
-            $this->addFlash('success', 'Votre catégorie a bien été créée');
+            $this->addFlash('success', 'Votre catégorie a bien été créée'); //ajoute un message flash
 
-            return $this->redirectToRoute('app_category');
+            return $this->redirectToRoute('app_category'); //Redirige l'utilisateur vers la route indiqué : app_category
         }
-        return $this->render('category/newCategory.html.twig', [
-            'form' => $form
+        return $this->render('category/newCategory.html.twig', [ //Affiche le formulaire s'il est soumis et valide, mais ré affiche le formulaire grâce au form juste en dessous
+            'form' => $form //Affiche le formulaire
         ]);
     }
 
