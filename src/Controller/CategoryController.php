@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use id;
 use App\Entity\Category;
 use App\Form\CategoryFormType;
 use App\Repository\CategoryRepository;
@@ -14,7 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class CategoryController extends AbstractController
 {
-    #[Route('/category', name: 'app_category')]
+    #[Route('admin/category', name: 'app_category')]
     public function category(CategoryRepository $repo): Response
     {
         $categories = $repo->findAll();
@@ -27,7 +26,7 @@ final class CategoryController extends AbstractController
         ]);
     }
 
-    #[Route('/category/new', name: 'app_category_new')]
+    #[Route('admin/category/new', name: 'app_category_new')]
     public function addCategory(EntityManagerInterface $entityManager, Request $request): Response
     {
         $category = new Category();
@@ -48,7 +47,7 @@ final class CategoryController extends AbstractController
         ]);
     }
 
-    #[Route('/category/update/{id}', name: 'app_category_update')]
+    #[Route('admin/category/update/{id}', name: 'app_category_update')]
     public function updateCategory( EntityManagerInterface $entityManager, Request $request, Category $category): Response
     {
 
@@ -69,7 +68,7 @@ final class CategoryController extends AbstractController
         ]);
     }
 
-    #[Route('/category/delete/{id}', name: 'app_delete')]
+    #[Route('admin/category/delete/{id}', name: 'app_delete')]
     public function delete($id, EntityManagerInterface $entityManager): Response 
     {
         $category = $entityManager->getRepository(Category::class)->find($id); //attention à faire le repository sur l'entité que l'on veut

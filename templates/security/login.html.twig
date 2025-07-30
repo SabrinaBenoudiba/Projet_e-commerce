@@ -4,7 +4,7 @@
 
 {% block body %}
     <div class="container containerForm">
-        <form method="post class="loginForm">
+        <form method="post" class="loginForm">
             {% if error %}
                 <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
             {% endif %}
