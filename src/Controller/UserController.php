@@ -10,11 +10,14 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\BrowserKit\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+#[IsGranted('ROLE_ADMIN')]
 final class UserController extends AbstractController
 {
     #[Route('/admin/user', name: 'app_user')]
+    #[IsGranted('ROLE_ADMIN')]
     public function user(UserRepository $userRepo): Response
     {
         return $this->render('user/user.html.twig', [
@@ -24,10 +27,11 @@ final class UserController extends AbstractController
     }
 
     #[Route('/admin/user/update/{id}', name: 'app_user_update_role')]
+    #[IsGranted('ROLE_ADMIN')]
     public function updateRole(EntityManagerInterface $entityManager, User $user): Response
     {
       
-        $user->setRoles(['ROLE_EDITOR', 'ROLE_USER']);
+        $user->setRoles(['ROLE_EDITOR', 'ROLE_USER']); //modifier, mettre à jour le rôle par role éditor et role user
         $entityManager->flush();
 
         $this->addFlash('success', "Le rôle de l'éditeur a bien été ajouté à l'utilisateur");
@@ -35,11 +39,12 @@ final class UserController extends AbstractController
         return $this->redirectToRoute('app_user');
     }
 
-    #[Route('/admin/user/delete/{id}', name: 'app_user_delete_role')]
+    #[Route('/admin/user/deleteRole/{id}', name: 'app_user_delete_role')]
+    #[IsGranted('ROLE_ADMIN')]
     public function deleteRole(EntityManagerInterface $entityManager, User $user): Response
     {
       
-        $user->setRoles([]);
+        $user->setRoles([]); //mettre à jour pour qu'il n'est pas de rôle
         $entityManager->flush();
 
         $this->addFlash('warning', "Le rôle de l'éditeur a bien été retiré à l'utilisateur");
@@ -47,7 +52,8 @@ final class UserController extends AbstractController
         return $this->redirectToRoute('app_user');
     }
 
-      #[Route('/admin/user/delete/{id}', name: 'app_user_delete_user')]
+    #[Route('/admin/user/deleteUser/{id}', name: 'app_user_delete_user')]
+    #[IsGranted('ROLE_ADMIN')]
     public function deleteUser(EntityManagerInterface $entityManager, $id, UserRepository $userRpository): Response
     {
         
@@ -59,7 +65,6 @@ final class UserController extends AbstractController
         
         return $this->redirectToRoute('app_user');
     }
-
 
 
 }
