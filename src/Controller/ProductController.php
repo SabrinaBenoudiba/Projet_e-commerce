@@ -135,7 +135,7 @@ public function stockAdd($id, EntityManagerInterface $entityManager, Request $re
     // $this->addFlash('danger', "Le produit a bien été supprimé");
  
 
-    return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
+    // return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
 
     return $this->render('product/addStock.html.twig',
             ['form'=> $form->createView(),
