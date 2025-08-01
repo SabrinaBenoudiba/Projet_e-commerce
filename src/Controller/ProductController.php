@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/product')]
 #[IsGranted('ROLE_ADMIN')]
@@ -25,13 +27,30 @@ final class ProductController extends AbstractController
     }
 
     #[Route('/new', name: 'app_product_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
         $product = new Product();
         $form = $this->createForm(ProductType::class, $product);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $image = $form->get('image')->getData(); //on récupère le fichier de l'image et son contenu qui sera upload (chargé)
+
+            if($image) { //si une image a bien été envoyée
+                $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME); //on récupère le nom d'origine sans les extensions (jpeg, png,jpg)
+                $safeImageName = $slugger->slug($originalName); //on va "slugger" (donc remplacer tous les accents espaces... par un "-")
+                $newFileImageName = $safeImageName.'-'.uniqid().'.'.$image->guessExtension(); //ajoute un id unique avec les extensions
+
+                try { //ça va déplacer le fichier (l'image) dans le dossier que j'ai défini dans le paramètre 'image_directory' 
+                    $image->move
+                        ($this->getParameter('image_directory'),
+                        $newFileImageName);
+                }catch (FileException $exception) {
+                    //gestion d'un message d'erreur si besoin
+                } 
+                $product->setImage($newFileImageName); //on sauvegarde le nom du fichier 
+            }
+
             $entityManager->persist($product);
             $entityManager->flush();
 
