@@ -10,10 +10,10 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>Id</th>
                     <th>Nom</th>
                     <th>Description</th>
-                    <th>Prix</th>
+                    <th>Prix (€)</th>
+                    <th>Stock</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -21,14 +21,19 @@
             {% for product in products %}
                 <tr>
                     <td>{{ product.name }}</td>
-                    <td>{{ product.description }}</td>
+                    <td>{{ product.description|slice(0,100) }} ...</td>
                     <td>{{ product.price }}</td>
                     <td>
+                        {% if product.stock > 0 %}
+                            {{ product.stock }}
+                        {% else %}
+                            <span class="fw-bold text-danger">Le stock est épuisé !</span>
+                        {% endif %}
                     </td>
                     <td> 
                         <a class="btn btn-primary" href="{{ path('app_product_show', {'id': product.id}) }}">Voir</a>
                         <a class="btn btn-outline-success" onclick=" return confirm('Voulez-vous vraiment modifier le produit ?')" href="{{ path('app_product_edit', {'id': product.id}) }}">Modifier</a>
-                        <a class="btn btn-outline-info" href="{{ path('app_product_new', {'id': product.id}) }}">Ajouter du stock</a>
+                        <a class="btn btn-outline-info" href="">Ajouter du stock</a>
                     </td>
                 </tr>
             {% else %}
