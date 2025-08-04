@@ -63,4 +63,5 @@ class AddProductHistory
 
         return $this;
     }
+
 }

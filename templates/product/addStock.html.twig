@@ -1,4 +1,15 @@
-<div class="container">
-    
+{% extends 'base.html.twig' %}
+{% block title %}Ajouter du stock {% endblock %}
 
-</div>
+{% block body %}
+    <div class="container">
+            <h1 class="mt-5 mb-5">Ajouter du stock</h1>
+            {#Affichage d'un message flash#}
+            {% include 'layouts/_flash_message.html.twig'%}
+                {{ form_start(form) }}
+                    {{ form_row(form.quantity, {'attr':{'class':'form form-control mb-3'}}) }}
+                    <input type="submit" class='btn btn-success btn-block'>
+                {{ form_end(form) }}
+    </div>
+
+{% endblock %}

@@ -6,6 +6,7 @@
 
 <div class="container">
     <h1>Product</h1>
+        <img src="{{ asset('uploads/images/' ~ product.image) }}" alt="Photo de profil" style="max-width:180px; border-radius:50%;">
         <table class="table">
             <tbody>
                 <tr>
@@ -24,14 +25,21 @@
                     <th>Price</th>
                     <td>{{ product.price }}</td>
                 </tr>
+                <tr>
+                    <th>Image du produit</th>
+                    <td>{{ product.image }}</td>
+                </tr>
+
             </tbody>
         </table>
 
-        <a href="{{ path('app_product_index') }}">back to list</a>
+        <a class="btn btn-outline-primary" href="{{ path('app_product_index') }}">back to list</a>
+        <a class="btn btn-outline-primary" href="{{ path('app_product_edit', {'id': product.id}) }}">edit</a>
+        
 
-        <a href="{{ path('app_product_edit', {'id': product.id}) }}">edit</a>
+        <a class="btn btn-outline-primary" href="{{ path('app_product_stock_add_history', {'id': product.id}) }}">Afficher l'historique de stock</a>
 
-        {{ include('product/_delete_form.html.twig') }}
+        <span class= "btn btn-outline-danger">{{ include('product/_delete_form.html.twig') }}</span>
         {# {% include 'product/_delete_form.html.twig' %} #}
 
 
