@@ -40,7 +40,7 @@ class Product
     /**
      * @var Collection<int, AddProductHistory>
      */
-    #[ORM\OneToMany(targetEntity: AddProductHistory::class, mappedBy: 'product')]
+    #[ORM\OneToMany(targetEntity: AddProductHistory::class, mappedBy: 'product', orphanRemoval:true )] // on a ajouté le orphanRemoval:True pour pouvoir supprimer les produits
     private Collection $addProductHistory;
 
     public function __construct()

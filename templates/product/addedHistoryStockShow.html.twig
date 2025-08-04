@@ -10,6 +10,7 @@
             <thead>
                 <tr>
                     <th>Id</th>
+                    <th>Nom</th>
                     <th>Quantité</th>
                     <th>Date d'ajout du stock</th>
                 </tr>
@@ -17,15 +18,14 @@
             <tbody>
             {% for productAddHistory in productsAddHistories %}
                 <tr>
-                        <td>{{ productAddHistory.id }}</td>
+                        <td>{{ productAddHistory.product.id }}</td>
+                        <td>{{ productAddHistory.product.name }}</td>
                         <td>{{ productAddHistory.quantity }}</td>
-                        <td>{{ productAddHistory.createdAt.format('d-m-Y H:i:s')}}</td>
+                        <td>{{ productAddHistory.createdAt | date ('d-m-Y H:i:s', 'Europe/Paris' )}}</td>
                     </tr>
                 {% endfor %}
             </table>
         <a class="btn btn-outline-primary" href="{{ path('app_product_index') }}">back to list</a>
     </div>
-
-
 
 {% endblock %}
