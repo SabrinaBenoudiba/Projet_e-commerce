@@ -5,10 +5,18 @@
 {% block body %}
     <div class="container">
         <div class="row">
-            <h2>Bienvenue sur notre page d'accueil</h2>
-
-    </div>
+            <h2 class="title text-center p-2">Bienvenue sur notre page d'accueil</h2>
+            {% for product in products %} {#dans la boucle for le products qu'on récupère est dans note homepagecontroller#}
+            <div class="card text-bg-dark col-2 m-4 p-0">
+                <img src="{{asset('uploads/images/'~product.image)}}" class="card-img-top" > 
+            <div class="card-body border-light mb-3 " >
+                <a class ="titleProductLink" href="{{ path('app_home_product_show', {'id': product.id}) }}"><h5 class="card-title">{{product.name}}</h5></a>
+                <p class="card-text">{{product.price}}€</p>
+                <p class="card-text">{{product.description|slice(0,100)}}...</p>
+            </div>
+            </div>
+            {% endfor %}   
         </div>
+    </div>
 
-   
 {% endblock %}
