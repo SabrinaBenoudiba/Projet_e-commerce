@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commande{% endblock %}
+
+{% block body %}
+    <div class="controller">
+        <div class="row">
+            <div class="col-8">
+                <h1 class="mt-4 mb-4">Commande</h1>
+                {{form_start(form)}}
+                    <input class="btn btn-outline-primary" type="submit" value="Continuer">
+                {{form_end(form)}}
+            </div>
+            <div class="col-4 mt-5">
+                <span class="mb-2">Montant à payer :</span>
+                <h3>
+                    <span id="card-price">{{ total }}</span> €
+                </h3>
+                <span>Frais de livraison</span>
+                
+
+            </div>
+
+        </div>
+    
+    </div>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script>
+    $(document).ready(function(){
+       const citySelector = $('#order_city'); // créer une constante en selectionant la balise ou élément html qui a l'id order_city
+       const cityValue = citySelector.val(); // ça récupère la valeur de l'élément citySelector qui est notre Select où on selectionne la ville (ça récupère la valeur et le stock dans la constante cityValue)
+
+        const url = 'http://localhost:8000/city/${cityValue}/shipping/cost'
+
+        //requête ajax
+        $.ajax({
+            url:url,
+            type:'GET'
+            success:function(response){
+
+            },
+            error:function(xhr,status,error){
+                
+            }
+        })
+
+    })
+</script>
+{% endblock %}
