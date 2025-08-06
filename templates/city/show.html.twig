@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}City{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h1>Ville</h1>
+
+        <table class="table">
+            <tbody>
+                <tr>
+                    <th>Id</th>
+                    <td>{{ city.id }}</td>
+                </tr>
+                <tr>
+                    <th>Nom</th>
+                    <td>{{ city.name }}</td>
+                </tr>
+                <tr>
+                    <th>Frais de livraison</th>
+                    <td>{{ city.shippingCost }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <a href="{{ path('app_city_index') }}">retour à la list</a>
+
+        <a href="{{ path('app_city_edit', {'id': city.id}) }}">modifier</a>
+
+        {{ include('city/_delete_form.html.twig') }}
+        </div>
+  
+{% endblock %}
