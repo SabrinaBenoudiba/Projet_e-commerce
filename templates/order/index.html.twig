@@ -17,7 +17,13 @@
                     <span id="card-price">{{ total }}</span> €
                 </h3>
                 <span>Frais de livraison</span>
-                
+                <h3>
+                   <span id="shippingCost"></span> €
+                </h3>
+                <span>Montant total à payer</span>
+                <h3>
+                    <span class="total-price"></span> €
+                </h3>
 
             </div>
 
@@ -30,18 +36,42 @@
        const citySelector = $('#order_city'); // créer une constante en selectionant la balise ou élément html qui a l'id order_city
        const cityValue = citySelector.val(); // ça récupère la valeur de l'élément citySelector qui est notre Select où on selectionne la ville (ça récupère la valeur et le stock dans la constante cityValue)
 
-        const url = 'http://localhost:8000/city/${cityValue}/shipping/cost'
+        const url = `/city/${cityValue}/shipping/cost`;
 
-        //requête ajax
+        function ajaxRequest(url) { //déf d'une fonction qui prend en paramètre une url
+            $.ajax({ // on envoie une requête ajax de type Get à l'url qu'on a construit
+                url: url,
+                type: 'GET',
+                success: function(response) {
+                    const newResponse = JSON.parse(response)
+                }
+            })
+
         $.ajax({
             url:url,
-            type:'GET'
+            type:'GET',
             success:function(response){
+                const newResponse = JSON.parse(response)
+                if (parseInt(newResponse.status) === 200){
+                    $("#shippingCost").text(newResponse.content)
 
+                    const cardPrice = parseInt($('#card-price').text());
+                    const shippingCost = parseInt($('#shippingCost').text());
+                    $('.total-price').text(cardPrice+shippingCost);
+                }     
             },
-            error:function(xhr,status,error){
-                
+            error:function(xhr,status,error){    
             }
+        })
+        }
+
+        ajaxRequest(url);
+
+
+        citySelector.on('change',function() {
+            const urlUpdate =`/city/${$(this).val()}/shipping/cost`;
+            // alert(urlUpdate)
+            ajaxRequest(urlUpdate)
         })
 
     })
