@@ -29,7 +29,7 @@ final class CartController extends AbstractController
     }
 #endregion CREATION
 #region ADD PRODUCTS
-        #[Route('/cart/add/{id}', name: 'app_cart_add', methods: ['GET'])]
+        #[Route('/cart/add/{id}', name: 'app_cart_new', methods: ['GET'])]
         // Définit une route pour ajouter un produit au panier
         public function addProductToCart(int $id, SessionInterface $session): Response // int veut dire type integer obligatoire, + sécurisé
         // Méthode pour ajouter un produit au panier, prend l'ID du produit et la session en paramètres
@@ -48,7 +48,7 @@ final class CartController extends AbstractController
         }
 #endregion ADD PRODUCTS
 #region REMOVE TO CART
-        #[Route('/cart/delete/{id}', name: 'app_cart_product_delete', methods: ['GET'])]
+        #[Route('/cart/remove/{id}', name: 'app_cart_product_remove', methods: ['GET'])]
         public function removeToCart($id, SessionInterface $session): Response
         {
              $cart = $session->get('cart', []);
@@ -71,7 +71,7 @@ final class CartController extends AbstractController
     }
 #endregion REMOVE TO CART
 #region DELETE CART
-    #[Route('/cart/delete', name: 'app_cart_delete', methods: ['GET'])]
+    #[Route('/cart/remove', name: 'app_cart_remove', methods: ['GET'])]
      public function deleteCart(SessionInterface $session): Response
         {
              $cart = $session->remove('cart', []);            
