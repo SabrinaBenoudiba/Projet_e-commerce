@@ -6,8 +6,14 @@
 
     <div class="container">
         <h1>Historique des Commandes</h1>
-        
-            <table class="table">
+        {% for order in orders %}
+            <h2>Commande n° {{order.id}}</h2>
+            {% if order.isCompleted == true %}
+                <span class ='text-success'>Commande livrée</span>
+            {% else %}
+                <span class'text-danger'>Commande non livrée</span>
+            {% endif %}
+            <table class="table">  
             <tr>
                 <th>Nom</th>
                 <th>Prénom</th>
@@ -15,7 +21,7 @@
                 <th>Ville</th>
                 <th>Téléphone</th> 
             </tr>  
-            {% for order in orders %}
+          
             <tr> 
                 <td>{{order.lastName}}</td>
                 <td>{{order.firstName}}</td>
@@ -23,8 +29,32 @@
                 <td>{{order.city.name}}</td>
                 <td>{{order.phone}}</td>
             </tr>
+            </table>
+
+            <h5 class='text-primary'>Corps de la commande</h5>
+            <table class='table table-bordered'>
+            <tr>
+                <th>Nom du produit</th>
+                <th>Prix du produit</th>
+                <th>Quantité</th>
+                <th>Prix total</th>
+            </tr>
+            {% for product in order.orderProducts %}
+            <tr>
+                <td>{{product.product.name}}</td>
+                <td>{{product.product.price}}</td>
+                <td>{{product.quantity}}</td>
+                <td>{{product.product.price * product.quantity}} €</td>
+            </tr>
             {% endfor %}
             </table>
+            <h5>Frais de livraison : {{order.city.shippingCost}} €</h5>
+            <h5 class="mb-5">Total à payer : {{order.totalPrice}} €</h5>
+            {% if order.isCompleted != true  %}
+                <a href="{{ path ('app_orders_is-completed-update', {'id':order.id})}}" class='btn btn-outline-primary col-2 m-1g-1'>Marquer comme livrée</a>    
+            {% endif %}
+            <a onclick="return confirm ('Voulez-vous vraiment supprimer cette commande ?')" href="{{ path ('app_orders_remove', {'id':order.id})}}" class='btn btn-outline-danger col-2 m-1g-1'>Supprimer la commande</a>
+        {% endfor %}
         {{ knp_pagination_render(orders, 'layouts/_pagination_template.html.twig') }}
     </div>
 

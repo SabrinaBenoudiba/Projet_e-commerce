@@ -17,12 +17,13 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 // Contrôleur final pour gérer les commandes
 final class OrderController extends AbstractController
 {
 
-#region CREATION DE LA COMMANDE
+#region CREATED
 
     #[Route('/order', name: 'app_order')] // Déclare une route pour la création de commande
     public function index(EntityManagerInterface $entityManager, ProductRepository $productRepository, 
@@ -68,33 +69,56 @@ final class OrderController extends AbstractController
     }
 #endregion CREATION DE LA COMMANDE
 
-#region MESSAGE SUITE A LA COMMANDE
+#region MESSAGE
     #[Route('/order_message', name: 'order_message')]
     public function orderMessage() :Response 
     { 
         return  $this->render('order/order_message.html.twig');
     }
-#endregion MESSAGE SUITE A LA COMMANDE
+#endregion MESSAGE 
 
-#region CONSULTATION COMMANDE
+#region SHOW
     #[Route('editor/orders', name: 'app_orders_show')]
-    // #[IsGranted('ROLE_EDITOR')]
+    #[IsGranted('ROLE_EDITOR')]
     public function getAllOrder(OrderRepository $orderRepository, Request $request, PaginatorInterface $paginator):Response
     {
         $orders = $orderRepository->findAll();
-        $data = $orderRepository->findBy([],['id'=>"DESC"]);
-        $orders = $paginator->paginate(
-            $data,
+        $ordersknp = $paginator->paginate(
+            $orders,
             $request->query->getInt('page', 1),//met en place la pagination
             5 //je choisi la limite de 8 articles par page
         );
         return $this->render('order/orders.html.twig',[
-            'orders' => $orders,
+            'orders' => $ordersknp,
         ]);
     }
-#endregion CONSULTATION COMMANDE
+#endregion SHOW
 
-#region FRAIS DE LIVRAISON
+#region UPDATE
+    #[Route('editor/orders/{id}/is-completed/update', name: 'app_orders_is-completed-update')]
+    #[IsGranted('ROLE_EDITOR')]
+    public function isCompletedUpdate(Request $request, $id, OrderRepository $orderRepository, EntityManagerInterface $entityManager):Response
+    {
+        $order = $orderRepository->find($id);
+        $order->setIsCompleted(true);
+        $entityManager->flush();
+        $this->addflash('success', 'Modification effectuée');
+        return $this->redirectToRoute('app_orders_show');
+    }
+#endregion UPDATE
+
+#region REMOVE
+    #[Route('/editor/orders/{id}/remove', name: 'app_orders_remove')]
+    public function removeOrder(Order $order, EntityManagerInterface $entityManager):Response 
+    {
+        $entityManager->remove($order);
+        $entityManager->flush();
+        $this->addFlash('danger', 'Commande supprimée');
+        return $this->redirectToRoute('app_orders_show',['type']);
+    }
+#endregion REMOVE
+
+#region SHIPPING COST
     #[Route('/city/{id}/shipping/cost', name: 'app_city_shipping_cost')] // Déclare une route pour obtenir le coût de livraison selon la ville choisie
     public function cityShippingCost(City $city): Response
     {
@@ -108,4 +132,4 @@ final class OrderController extends AbstractController
         // dd($city);  // (Ancienne ligne de debug)
     }
 }
-#endregion FRAIS DE LIVRAISON
+#endregion SHIPPING COST
