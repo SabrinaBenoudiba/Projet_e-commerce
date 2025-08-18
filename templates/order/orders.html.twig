@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Historique des Commandes{% endblock %}
+
+{% block body %}
+
+    <div class="container">
+        <h1>Historique des Commandes</h1>
+        
+            <table class="table">
+            <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Adresse</th>
+                <th>Ville</th>
+                <th>Téléphone</th> 
+            </tr>  
+            {% for order in orders %}
+            <tr> 
+                <td>{{order.lastName}}</td>
+                <td>{{order.firstName}}</td>
+                <td>{{order.address}}</td>
+                <td>{{order.city.name}}</td>
+                <td>{{order.phone}}</td>
+            </tr>
+            {% endfor %}
+            </table>
+        {{ knp_pagination_render(orders, 'layouts/_pagination_template.html.twig') }}
+    </div>
+
+{% endblock %}

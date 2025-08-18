@@ -4,51 +4,108 @@ namespace App\Controller;
 
 use App\Entity\City;
 use App\Entity\Order;
+use App\Entity\OrderProducts;
 use App\Form\OrderType;
+use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
 use App\Service\Cart;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+// Contrôleur final pour gérer les commandes
 final class OrderController extends AbstractController
 {
-    #[Route('/order', name: 'app_order')]
-    public function index(EntityManagerInterface $entityManager, ProductRepository $productRepository, 
-                            SessionInterface $session, Request $request, Cart $cart): Response
-    {
 
-        $data = $cart->getCart($session);           
-        $order = new Order();
+#region CREATION DE LA COMMANDE
+
+    #[Route('/order', name: 'app_order')] // Déclare une route pour la création de commande
+    public function index(EntityManagerInterface $entityManager, ProductRepository $productRepository, 
+                         SessionInterface $session, Request $request, Cart $cart): Response
+    {
+        $data = $cart->getCart($session); // Récupère les données du panier depuis la session utilisateur         
+
+       
+        $order = new Order(); // Crée une nouvelle instance de la commande
+
+        // Génère le formulaire de commande lié à l'objet $order
         $form = $this->createForm(OrderType::class, $order);
         $form->handleRequest($request);
 
-        if($form->isSubmitted() && $form->isValid()) {
-            if($order->isPayOnDelivery()){
-                $order->setTotalPrice($data['total']);
-                $order->setCreatedAt(new \DateTimeImmutable());
-                $entityManager->persist($order);
-                $entityManager->flush();
+        
+        if($form->isSubmitted() && $form->isValid()) { // Vérifie si le formulaire a été soumis et est valide
+ 
+            if($order->isPayOnDelivery()){ // Vérifie si le mode de paiement est "paiement à la livraison"
+                if(!empty($data['total'])){
+                $order->setTotalPrice($data['total']); // Définit le prix total de la commande
+                $order->setCreatedAt(new \DateTimeImmutable()); // Définit la date de création de la commande à "maintenant"
+                $entityManager->persist($order); // Prépare la commande pour l'enregistrement en base de données
+                $entityManager->flush(); // Enregistre la commande dans la base de données
+
+                    foreach($data['cart'] as $value) {  // Parcourt chaque article du panier pour l'enregistrer en tant que OrderProducts
+                        $orderProduct = new OrderProducts();
+                        $orderProduct->setOrder($order); // Lie l'objet OrderProducts à la commande courante
+                        $orderProduct->setProduct($value['product']);// Lie le produit acheté
+                        $orderProduct->setQuantity($value['quantity']);  // Spécifie la quantité pour ce produit
+                        $entityManager->persist($orderProduct);
+                        $entityManager->flush();// Enregistre chaque OrderProduct en base
+                    }
+                }
             }
+            $session->set('cart', []); //Mise à jout du contenu du panier en session
+            return $this->redirectToRoute('order_message');
         }
 
-        return $this->render('order/index.html.twig', [
-            'form' =>$form->createView(),
-            'total'=>$data['total']
+        return $this->render('order/index.html.twig', [ // Affiche le formulaire et le total du panier dans la vue "order/index.html.twig"
+            'form' => $form->createView(),
+            'total' => $data['total']
         ]);
     }
+#endregion CREATION DE LA COMMANDE
 
-    #[Route('/city/{id}/shipping/cost', name: 'app_city_shipping_cost')]
-        public function cityShippingCost(City $city): Response
+#region MESSAGE SUITE A LA COMMANDE
+    #[Route('/order_message', name: 'order_message')]
+    public function orderMessage() :Response 
+    { 
+        return  $this->render('order/order_message.html.twig');
+    }
+#endregion MESSAGE SUITE A LA COMMANDE
+
+#region CONSULTATION COMMANDE
+    #[Route('editor/orders', name: 'app_orders_show')]
+    // #[IsGranted('ROLE_EDITOR')]
+    public function getAllOrder(OrderRepository $orderRepository, Request $request, PaginatorInterface $paginator):Response
     {
-        $cityShippingPrice = $city->getShippingCost();
-        
-        // reponse en json
-        return new Response(json_encode(['status'=>200, "message"=>'on', 'content'=> $cityShippingPrice]));
+        $orders = $orderRepository->findAll();
+        $data = $orderRepository->findBy([],['id'=>"DESC"]);
+        $orders = $paginator->paginate(
+            $data,
+            $request->query->getInt('page', 1),//met en place la pagination
+            5 //je choisi la limite de 8 articles par page
+        );
+        return $this->render('order/orders.html.twig',[
+            'orders' => $orders,
+        ]);
+    }
+#endregion CONSULTATION COMMANDE
 
-        // dd($city);
+#region FRAIS DE LIVRAISON
+    #[Route('/city/{id}/shipping/cost', name: 'app_city_shipping_cost')] // Déclare une route pour obtenir le coût de livraison selon la ville choisie
+    public function cityShippingCost(City $city): Response
+    {
+        $cityShippingPrice = $city->getShippingCost(); // Récupère le prix de livraison de la ville demandée
+        
+        return new Response(json_encode([  // Retourne la réponse au format JSON (utilisable par le JavaScript côté front)
+            'status' => 200,
+            "message" => 'on',
+            'content' => $cityShippingPrice
+        ]));
+        // dd($city);  // (Ancienne ligne de debug)
     }
 }
+#endregion FRAIS DE LIVRAISON
