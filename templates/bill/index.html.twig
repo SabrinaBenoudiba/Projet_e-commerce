@@ -1,6 +1,6 @@
 {# {% extends 'base.html.twig' %} #}
 
-{# {% block title %}Factures{% endblock %} #}
+{% block title %}Factures{% endblock %}
 
 {% block body %}
     <div class="container">
@@ -23,7 +23,7 @@
             <td>{{ order.firstName }} </td>
             <td>{{ order.lastName }} </td>
             <td>{{ order.phone }} </td>
-            <td>{{ order.adress }} </td>
+            <td>{{ order.address }} </td>
             <td>{{ order.city.name}} </td>
         </tr>
         </table>
