@@ -29,6 +29,7 @@ final class StripeController extends AbstractController
     #[Route('/stripe/notify', name: 'app_stripe_notify')]
     public function stripeNotify(Request $request): Response
     {
+        // file_put_contents("log.txt", "");
         // Définir la clé secrète de Stripe à partir de la variable d'environnement
         Stripe::setApiKey($_SERVER['STRIPE_SECRET_KEY']);
         
@@ -36,6 +37,8 @@ final class StripeController extends AbstractController
         $endpoint_secret = ($_SERVER['STRIPE_WEBHOOK_SECRET']);
         // Récupérer le contenu de la requête
         $payload = $request->getContent();
+        // file_put_contents("log.txt", $payload, FILE_APPEND);
+
         // Récupérer l'en-tête de signature de la requête
         $sigHeader = $request->headers->get('Stripe-Signature');
         // Initialiser l'événement à null
@@ -62,7 +65,7 @@ final class StripeController extends AbstractController
                 
                 // Enregistrer les détails du paiement dans un fichier
                 $fileName = 'stripe-detail-'.uniqid().'.txt';
-                file_put_contents($fileName, $paymentIntent);
+                // file_put_contents($fileName, $paymentIntent);
                 break;
             case 'payment_method.attached':   // Événement de méthode de paiement attachée
                 // Récupérer l'objet payment_method
