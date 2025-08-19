@@ -25,10 +25,10 @@ final class BillController extends AbstractController
         $domPdf->loadHtml($html);
         $domPdf->render();
         $domPdf->stream('bill-'.$order->getId().'.pdf',[
-            'Attachment'=>true
+            'Attachment'=>true // true pour télécharger les factures - false pour diriger directement sur la facture
         ]);
 
-        return new Response('',200,[ //
+        return new Response('',200,[ 
             'Content-Type' => 'application/pdf' 
         ]);
     }

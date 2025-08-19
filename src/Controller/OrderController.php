@@ -9,6 +9,7 @@ use App\Form\OrderType;
 use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
 use App\Service\Cart;
+use App\Service\StripePayment;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,12 +17,17 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
-// Contrôleur final pour gérer les commandes
-final class OrderController extends AbstractController
+// Contrôleur pour gérer les commandes
+class OrderController extends AbstractController
 {
+    public function __construct(private MailerInterface $mailer){
+
+    }
 
 #region CREATED
 
@@ -57,11 +63,28 @@ final class OrderController extends AbstractController
                         $entityManager->flush();// Enregistre chaque OrderProduct en base
                     }
                 }
-            }
+            
             $session->set('cart', []); //Mise à jout du contenu du panier en session
-            return $this->redirectToRoute('order_message');
-        }
+            $html = $this->renderView('mail/orderConfirm.html.twig',[
+                'order'=>$order
+            ]);
+            $email = (new Email())
+            ->from('monSite@gmail.com') // modifier le mail par celui du site !
+            // ->to ('toa@gmail.com')
+            ->to($order->getEmail())
+            ->subject ('Confirmation de réception de commande')
+            ->html($html);
+            $this->mailer->send($email);
+            return $this->redirectToRoute('app_order_message');
+            }
 
+        $paymentStripe = new StripePayment(); 
+        $shippingCost = $order->getCity()->getShippingCost();
+        $paymentStripe->startPayment($data, $shippingCost); // on importe le panier donc $data
+        $stripeRedirectUrl = $paymentStripe->getStripeRedirectUrl();
+        // dd( $stripeRedirectUrl);
+        return $this->redirect($stripeRedirectUrl);
+        }
         return $this->render('order/index.html.twig', [ // Affiche le formulaire et le total du panier dans la vue "order/index.html.twig"
             'form' => $form->createView(),
             'total' => $data['total']
@@ -70,7 +93,7 @@ final class OrderController extends AbstractController
 #endregion CREATION DE LA COMMANDE
 
 #region MESSAGE
-    #[Route('/order_message', name: 'order_message')]
+    #[Route('/order_message', name: 'app_order_message')]
     public function orderMessage() :Response 
     { 
         return  $this->render('order/order_message.html.twig');
@@ -86,7 +109,7 @@ final class OrderController extends AbstractController
         $ordersknp = $paginator->paginate(
             $orders,
             $request->query->getInt('page', 1),//met en place la pagination
-            5 //je choisi la limite de 8 articles par page
+            5 //je choisi la limite de 5 commandes par page
         );
         return $this->render('order/orders.html.twig',[
             'orders' => $ordersknp,
