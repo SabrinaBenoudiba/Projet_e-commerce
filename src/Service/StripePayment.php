@@ -14,7 +14,7 @@ class StripePayment
         Stripe::setApiVersion('2025-07-30.basil');
      }
 
-     public function startPayment($cart, $shippingCost){
+     public function startPayment($cart, $shippingCost, $orderId){
         //dd($cart)
         $cartProducts = $cart['cart'];
         $products = [
@@ -47,22 +47,25 @@ class StripePayment
                 ],$products) 
 
             ],
-            'mode' => 'payment',
-            'cancel_url' => 'http://127.0.0.1:8000/pay/cancel',
-            'success_url' => 'http://127.0.0.1:8000/pay/success',
-            'billing_address_collection' => 'required',
+            'mode' => 'payment', //mode de paiement
+            'cancel_url' => 'http://127.0.0.1:8000/pay/cancel', //si paiement annulé on redirige ici
+            'success_url' => 'http://127.0.0.1:8000/pay/success', //si paiement réussi
+            'billing_address_collection' => 'required', //si on autorise les factures
             'shipping_address_collection' => [ //pays où on souhaite autoriser le paiement
                 'allowed_countries' => ['FR'],
             ],
-            'metadata' => [
-                //'order_id' => $cart->id, //id de la commande
+           'payment_intent_data' => [
+                'metadata' => [
+                    'orderId' =>$orderId//id de la commande
+                ]
             ]
-        ]);
+            
+        ]); 
 
-         $this->redirectUrl = $session->url; 
+         $this->redirectUrl = $session->url; //redirection vers stripe pour le paiement
 
      }
-     public function getStripeRedirectUrl(){
+     public function getStripeRedirectUrl(){ //permet de recuperer l'url de l'utilisateur pour stripe
         return $this->redirectUrl;
      }
 

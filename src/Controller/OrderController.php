@@ -35,61 +35,62 @@ class OrderController extends AbstractController
     public function index(EntityManagerInterface $entityManager, ProductRepository $productRepository, 
                          SessionInterface $session, Request $request, Cart $cart): Response
     {
-        $data = $cart->getCart($session); // Récupère les données du panier depuis la session utilisateur         
+        $data = $cart->getCart($session); // Récupère les données du panier depuis la session utilisateur (using le service Cart)         
 
        
-        $order = new Order(); // Crée une nouvelle instance de la commande
+        $order = new Order(); // Crée une nouvelle instance de la commande (de Order)
+
+        // $order->setIsCompleted(false);
 
         // Génère le formulaire de commande lié à l'objet $order
         $form = $this->createForm(OrderType::class, $order);
         $form->handleRequest($request);
 
         
-        if($form->isSubmitted() && $form->isValid()) { // Vérifie si le formulaire a été soumis et est valide
- 
-            if($order->isPayOnDelivery()){ // Vérifie si le mode de paiement est "paiement à la livraison"
-                if(!empty($data['total'])){
-                $order->setTotalPrice($data['total']); // Définit le prix total de la commande
-                $order->setCreatedAt(new \DateTimeImmutable()); // Définit la date de création de la commande à "maintenant"
-                $entityManager->persist($order); // Prépare la commande pour l'enregistrement en base de données
-                $entityManager->flush(); // Enregistre la commande dans la base de données
+        if($form->isSubmitted() && $form->isValid()) { // Quand c'est true
+            if(!empty($data['total'])){ // Vérifie si le total du panier n'est pas vide
+            $order->setTotalPrice($data['total']); // Définit le prix total de la commande
+            $order->setCreatedAt(new \DateTimeImmutable()); // Définit la date de création de la commande à "maintenant"
+            $entityManager->persist($order); // Prépare la commande pour l'enregistrement en base de données
+            $entityManager->flush(); // Enregistre la commande dans la base de données
 
-                    foreach($data['cart'] as $value) {  // Parcourt chaque article du panier pour l'enregistrer en tant que OrderProducts
-                        $orderProduct = new OrderProducts();
-                        $orderProduct->setOrder($order); // Lie l'objet OrderProducts à la commande courante
-                        $orderProduct->setProduct($value['product']);// Lie le produit acheté
-                        $orderProduct->setQuantity($value['quantity']);  // Spécifie la quantité pour ce produit
-                        $entityManager->persist($orderProduct);
-                        $entityManager->flush();// Enregistre chaque OrderProduct en base
-                    }
+                foreach($data['cart'] as $value) {  // Parcourt chaque article du panier pour l'enregistrer en tant que OrderProducts
+                    $orderProduct = new OrderProducts(); // Crée un nouvel objet OrderProducts
+                    $orderProduct->setOrder($order); // Lie l'objet OrderProducts à la commande courante
+                    $orderProduct->setProduct($value['product']);// Lie le produit acheté
+                    $orderProduct->setQuantity($value['quantity']);  // Spécifie la quantité pour ce produit
+                    $entityManager->persist($orderProduct);
+                    $entityManager->flush();// Enregistre chaque OrderProduct en base
                 }
-            
-            $session->set('cart', []); //Mise à jout du contenu du panier en session
-            $html = $this->renderView('mail/orderConfirm.html.twig',[
-                'order'=>$order
-            ]);
-            $email = (new Email())
-            ->from('monSite@gmail.com') // modifier le mail par celui du site !
-            // ->to ('toa@gmail.com')
-            ->to($order->getEmail())
-            ->subject ('Confirmation de réception de commande')
-            ->html($html);
-            $this->mailer->send($email);
-            return $this->redirectToRoute('app_order_message');
-            }
+                if($order->isPayOnDelivery()){ // Vérifie si le mode de paiement est "paiement à la livraison"      
+                    $session->set('cart', []); //Mise à jout du contenu du panier en session
+                    $html = $this->renderView('mail/orderConfirm.html.twig',[
+                        'order'=>$order
+                    ]);
+                    $email = (new Email())
+                    ->from('monSite@gmail.com') // modifier le mail par celui du site !
+                    // ->to ('toa@gmail.com')
+                    ->to($order->getEmail())
+                    ->subject ('Confirmation de réception de commande')
+                    ->html($html);
+                    $this->mailer->send($email);
+                    return $this->redirectToRoute('app_order_message');
+                }
 
-        $paymentStripe = new StripePayment(); 
-        $shippingCost = $order->getCity()->getShippingCost();
-        $paymentStripe->startPayment($data, $shippingCost); // on importe le panier donc $data
-        $stripeRedirectUrl = $paymentStripe->getStripeRedirectUrl();
-        // dd( $stripeRedirectUrl);
-        return $this->redirect($stripeRedirectUrl);
+                // Quand c'est false
+                $paymentStripe = new StripePayment(); 
+                $shippingCost = $order->getCity()->getShippingCost();
+                $paymentStripe->startPayment($data, $shippingCost, $order->getId()); // on importe le panier donc $data
+                $stripeRedirectUrl = $paymentStripe->getStripeRedirectUrl();
+                // dd( $stripeRedirectUrl);
+                return $this->redirect($stripeRedirectUrl);
+            }
         }
-        return $this->render('order/index.html.twig', [ // Affiche le formulaire et le total du panier dans la vue "order/index.html.twig"
-            'form' => $form->createView(),
-            'total' => $data['total']
-        ]);
-    }
+            return $this->render('order/index.html.twig', [ // Affiche le formulaire et le total du panier dans la vue "order/index.html.twig"
+                'form' => $form->createView(),
+                'total' => $data['total']
+            ]);
+        }
 #endregion CREATION DE LA COMMANDE
 
 #region MESSAGE
