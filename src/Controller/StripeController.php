@@ -9,13 +9,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 final class StripeController extends AbstractController
 {
     #[Route('/pay/success', name: 'app_stripe_success')]
-    public function success(): Response
+    public function success(SessionInterface $session): Response
     {
-        return $this->render('stripe/index.html.twig', [
+        $session->set('cart',[]);
+        return $this->render('stripe/index.html.twig', [  // Rendre la vue "index.html.twig" avec le nom du contrôleur
             'controller_name' => 'StripeController',
         ]);
     }
@@ -31,7 +33,6 @@ final class StripeController extends AbstractController
     #[Route('/stripe/notify', name: 'app_stripe_notify')]
     public function stripeNotify(Request $request, OrderRepository $orderRepository, EntityManagerInterface $entityManager): Response
     {
-        // file_put_contents("log.txt", "");
         // Définir la clé secrète de Stripe à partir de la variable d'environnement
         Stripe::setApiKey($_SERVER['STRIPE_SECRET_KEY']);
         
@@ -58,20 +59,27 @@ final class StripeController extends AbstractController
             // Retourner une erreur 400 si la signature est invalide
             return new Response('Invalid signature', 400);
         }
-
+        file_put_contents("log.txt", $event->type, FILE_APPEND);
          // Gérer les différents types d'événements
         switch ($event->type) {
             case 'payment_intent.succeeded':  // Événement de paiement réussi
+                file_put_contents("log.txt", "succeeded", FILE_APPEND);
                 // Récupérer l'objet payment_intent
                 $paymentIntent = $event->data->object;
                 
                 // Enregistrer les détails du paiement dans un fichier
                 $fileName = 'stripe-detail-'.uniqid().'.txt';
-                $orderId = $paymentIntent->metadata->orderId;
-                $order = $orderRepository->find($orderId);
-                $order->setIsPaymentCompleted(1);
-                $entityManager->flush;
-                // file_put_contents($fileName, $orderId);
+                $orderId = $paymentIntent->metadata->orderid;
+                $order = $orderRepository->findOneBy(["id"=>$orderId]);
+
+                $cartPrice = $order->getTotalPrice();
+                $stripeTotalAmount = $paymentIntent->amount;
+
+                if($cartPrice*100==$stripeTotalAmount){
+                    $order->setIsPaymentCompleted(1);
+                    // file_put_contents("order.txt",$order->isPaymentCompleted());
+                    $entityManager->flush();
+                }
                 break;
             case 'payment_method.attached':   // Événement de méthode de paiement attachée
                 // Récupérer l'objet payment_method
