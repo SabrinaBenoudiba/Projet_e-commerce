@@ -78,7 +78,7 @@ class OrderController extends AbstractController
                     ->subject ('Confirmation de réception de commande')
                     ->html($html);
                     $this->mailer->send($email);
-                    return $this->redirectToRoute('app_order_message');
+                    return $this->redirectToRoute('app_order_message'); // Redirection vers la page du panier
                 }
 
                 // Quand c'est false
