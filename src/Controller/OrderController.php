@@ -110,22 +110,25 @@ class OrderController extends AbstractController
     #[IsGranted('ROLE_EDITOR')]
     public function getAllOrder($type, OrderRepository $orderRepository, Request $request, PaginatorInterface $paginator, ProductRepository $productRepository):Response
     {
-        if($type == 'is-completed'){
+        if($type === 'is-completed'){
              $data = $orderRepository->findBy(['isCompleted'=>1],['id'=>'DESC']);
-        }else if($type == 'pay-on-stripe-not-delivered'){
+        }else if($type === 'pay-on-stripe-not-delivered'){
             $data = $orderRepository->findBy(['isCompleted'=>null,'payOnDelivery'=>0,'isPaymentCompleted'=>1],['id'=>'DESC']);
-        }else if($type == 'pay-on-stripe-is-delivered'){
-            $data = $orderRepository->findBy(['isCompleted'=>1,'payOnDelivery'=>0,'isPaymentCompleted'=>1],['id'=>'DESC']);
-        }else if($type == 'no_delivery'){
-            $data = $orderRepository->findBy(['isCompleted'=>null,'payOnDelivery'=>0,'isPaymentCompleted'=>0],['id'=>'DESC']);
+        }else if($type === 'pay-on-stripe-is-delivered'){
+            $data = $orderRepository->findBy(['isCompleted'=>1,
+            // 'payOnDelivery'=>0,
+            'isPaymentCompleted'=>1],['id'=>'DESC']);
+        }else if($type === 'no_delivery'){
+            $data = $orderRepository->findBy(['isCompleted'=>null,
+            // 'payOnDelivery'=>0,
+            'isPaymentCompleted'=>0],['id'=>'DESC']);
+        }else if ($type === 'all'){
+            $data = $orderRepository->findBy([], ['id' => "DESC"]);
         }
 
-        // $orders = $orderRepository->findAll();
-        $orders = $paginator->paginate(
-            $data,
-            $request->query->getInt('page', 1),//met en place la pagination
-            5 //je choisi la limite de 5 commandes par page
-        );
+        // // $orders = $orderRepository->findAll();
+        $orders = $paginator->paginate($data, $request->query->getInt('page', 1), 5);
+
         return $this->render('order/orders.html.twig',[
             'orders' => $orders,
         ]);
@@ -154,7 +157,9 @@ class OrderController extends AbstractController
         $entityManager->remove($order);
         $entityManager->flush();
         $this->addFlash('danger', 'Commande supprimée');
-        return $this->redirectToRoute('app_orders_show',['type']);
+        return $this->redirectToRoute('app_orders_show', ['type'=>'all']);
+        // return $this->redirect($request->headers->get('referer'));
+        // return $this->redirectToRoute('app_orders_show',['type']);
     }
 #endregion REMOVE
 
