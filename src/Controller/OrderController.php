@@ -108,7 +108,7 @@ class OrderController extends AbstractController
 #region SHOW
     #[Route('editor/orders/{type}', name: 'app_orders_show')]
     #[IsGranted('ROLE_EDITOR')]
-    public function getAllOrder($type, OrderRepository $orderRepository, Request $request, PaginatorInterface $paginator, ProductRepository $productRepository):Response
+    public function getAllOrder(?string $type, OrderRepository $orderRepository, Request $request, PaginatorInterface $paginator):Response
     {
         if($type === 'is-completed'){
              $data = $orderRepository->findBy(['isCompleted'=>1],['id'=>'DESC']);
@@ -131,6 +131,7 @@ class OrderController extends AbstractController
 
         return $this->render('order/orders.html.twig',[
             'orders' => $orders,
+            'type' => $type,
         ]);
     }
 #endregion SHOW
@@ -151,13 +152,17 @@ class OrderController extends AbstractController
 #endregion UPDATE
 
 #region REMOVE
-    #[Route('/editor/orders/{id}/remove', name: 'app_orders_remove')]
-    public function removeOrder(Order $order, EntityManagerInterface $entityManager):Response 
+    #[Route('/editor/orders/{id}/remove/{type}', name: 'app_orders_remove')]
+
+    public function removeOrder(?string $type, $id, OrderRepository $orderRepository, EntityManagerInterface $entityManager):Response
     {
+        $order = $orderRepository->find($id);
         $entityManager->remove($order);
         $entityManager->flush();
         $this->addFlash('danger', 'Commande supprimée');
-        return $this->redirectToRoute('app_orders_show', ['type'=>'all']);
+        return $this->redirectToRoute('app_orders_show', ["type" => $type]);
+
+        // return $this->redirectToRoute('app_orders_show', ['type' => $type]);
         // return $this->redirect($request->headers->get('referer'));
         // return $this->redirectToRoute('app_orders_show',['type']);
     }
