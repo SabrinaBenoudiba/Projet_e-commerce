@@ -59,7 +59,7 @@ final class StripeController extends AbstractController
             // Retourner une erreur 400 si la signature est invalide
             return new Response('Invalid signature', 400);
         }
-        file_put_contents("log.txt", $event->type, FILE_APPEND);
+        // file_put_contents("log.txt", $event->type, FILE_APPEND);
          // Gérer les différents types d'événements
         switch ($event->type) {
             case 'payment_intent.succeeded':  // Événement de paiement réussi
@@ -78,8 +78,19 @@ final class StripeController extends AbstractController
                 if($cartPrice*100==$stripeTotalAmount){
                     $order->setIsPaymentCompleted(1);
                     // file_put_contents("order.txt",$order->isPaymentCompleted());
+
+                    foreach($order->getOrderProducts() as $orderProduct){
+                        $quantity = $orderProduct->getQuantity();
+                        $product = $orderProduct->getProduct();
+                        $stock = $product->getStock();
+
+                        $updateStock = $stock - $quantity;
+                        $product->setStock($updateStock);
+                    };
+
                     $entityManager->flush();
                 }
+
                 break;
             case 'payment_method.attached':   // Événement de méthode de paiement attachée
                 // Récupérer l'objet payment_method
