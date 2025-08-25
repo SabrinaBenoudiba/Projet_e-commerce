@@ -66,20 +66,20 @@ class OrderController extends AbstractController
                     $entityManager->persist($orderProduct);
                     $entityManager->flush();// Enregistre chaque OrderProduct en base
                 }
-                if($order->isPayOnDelivery()){ // Vérifie si le mode de paiement est "paiement à la livraison"      
-                    $session->set('cart', []); //Mise à jout du contenu du panier en session
-                    $html = $this->renderView('mail/orderConfirm.html.twig',[
-                        'order'=>$order  //on recupere le $order apres le flush donc on a toutes les infos
-                    ]);
-                    $email = (new Email())
-                    ->from('monSite@gmail.com') // modifier le mail par celui du site !
-                    // ->to ('toa@gmail.com')
-                    ->to($order->getEmail())
-                    ->subject ('Confirmation de réception de commande')
-                    ->html($html);
-                    $this->mailer->send($email);
-                    return $this->redirectToRoute('app_order_message'); // Redirection vers la page du panier
-                }
+                // if($order->isclickAndCollect()){ // Vérifie si le mode de paiement est "paiement à la livraison"      
+                //     $session->set('cart', []); //Mise à jout du contenu du panier en session
+                //     $html = $this->renderView('mail/orderConfirm.html.twig',[
+                //         'order'=>$order  //on recupere le $order apres le flush donc on a toutes les infos
+                //     ]);
+                //     $email = (new Email())
+                //     ->from('monSite@gmail.com') // modifier le mail par celui du site !
+                //     // ->to ('toa@gmail.com')
+                //     ->to($order->getEmail())
+                //     ->subject ('Confirmation de réception de commande')
+                //     ->html($html);
+                //     $this->mailer->send($email);
+                //     return $this->redirectToRoute('app_order_message'); // Redirection vers la page du panier
+                // }
 
                 // Quand c'est false
                 $paymentStripe = new StripePayment(); 
@@ -112,15 +112,16 @@ class OrderController extends AbstractController
     {
         if($type === 'is-completed'){
              $data = $orderRepository->findBy(['isCompleted'=>1],['id'=>'DESC']);
-        }else if($type === 'pay-on-stripe-not-delivered'){
-            $data = $orderRepository->findBy(['isCompleted'=>null,'payOnDelivery'=>0,'isPaymentCompleted'=>1],['id'=>'DESC']);
-        }else if($type === 'pay-on-stripe-is-delivered'){
+        // }else if($type === 'pay-on-stripe-not-delivered'){
+        //     $data = $orderRepository->findBy(['isCompleted'=>null,'clickAndCollect'=>0,'isPaymentCompleted'=>1],['id'=>'DESC']);
+        }
+        else if($type === 'pay-on-stripe-is-delivered'){
             $data = $orderRepository->findBy(['isCompleted'=>1,
-            // 'payOnDelivery'=>0,
+            // 'clickAndCollect'=>0,
             'isPaymentCompleted'=>1],['id'=>'DESC']);
         }else if($type === 'no_delivery'){
             $data = $orderRepository->findBy(['isCompleted'=>null,
-            // 'payOnDelivery'=>0,
+            // 'clickAndCollect'=>0,
             'isPaymentCompleted'=>0],['id'=>'DESC']);
         }else if ($type === 'all'){
             $data = $orderRepository->findBy([], ['id' => "DESC"]);

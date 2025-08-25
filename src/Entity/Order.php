@@ -35,7 +35,7 @@ class Order
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column]
-    private ?bool $payOnDelivery = null;
+    private ?bool $clickAndCollect = null;
 
     /**
      * @var Collection<int, OrderProducts>
@@ -137,14 +137,14 @@ class Order
         return $this;
     }
 
-    public function isPayOnDelivery(): ?bool
+    public function isclickAndCollect(): ?bool
     {
-        return $this->payOnDelivery;
+        return $this->clickAndCollect;
     }
 
-    public function setPayOnDelivery(bool $payOnDelivery): static
+    public function setclickAndCollect(bool $clickAndCollect): static
     {
-        $this->payOnDelivery = $payOnDelivery;
+        $this->clickAndCollect = $clickAndCollect;
 
         return $this;
     }
