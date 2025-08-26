@@ -9,12 +9,17 @@
             {% for product in products %} {#dans la boucle for le products qu'on récupère est dans note homepagecontroller#}
             <div class="card text-bg-dark col-2 m-4 p-0">
                 <img src="{{asset('uploads/images/'~product.image)}}" class="card-img-top" > 
-            <div class="card-body border-light mb-3 " >
-                <a class ="titleProductLink" href="{{ path('app_home_product_show', {'id': product.id}) }}"><h5 class="card-title">{{product.name}}</h5></a>
-                <p class="card-text">{{product.price}}€</p>
-                <a class= "btn btn-primary"href="{{ path('app_cart_new', {'id': product.id}) }}">Ajouter au panier</a>
-                <p class="card-text">{{product.description|slice(0,100)}}...</p>
-            </div>
+                <div class="card-body border-light mb-3 " >
+                    <a class ="titleProductLink" href="{{ path('app_home_product_show', {'id': product.id}) }}"><h5 class="card-title">{{product.name}}</h5></a>
+                    <p class="card-text">{{product.price}}€</p>
+                    <a class= "m-2 btn btn-outline-primary"href="{{ path('app_cart_new', {'id': product.id}) }}">Ajouter au panier</a>
+                {% if not app.user.favorites.contains(product) %}
+                    <a class= "m-2 btn btn-outline-primary"href="{{ path('app_product_favorites', {'id': product.id}) }}">Ajouter aux favoris</a>
+                {% else %}
+                    <a class= "m-2 btn btn-outline-danger"href="{{ path('app_product_favorites', {'id': product.id}) }}">Supprimer des favoris</a>
+                {% endif %}
+                    <p class="card-text">{{product.description|slice(0,100)}}...</p>
+                </div>
             </div>
             {% endfor %}   
         </div>

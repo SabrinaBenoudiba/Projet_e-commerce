@@ -50,7 +50,11 @@
     </li>
     <li class="nav-item">
         <a href="{{ path('app_logout') }} " class='nav-link'>Se déconnecter</a>
-    </li> 
+    </li>
+  {% else %}
+     <li class="nav-item">
+        <a href="{{ path('app_logout') }} " class='nav-link'>Se déconnecter</a>
+    </li>
   {% endif %}
   {% if app.user == false %} 
     <li class="nav-item">
@@ -59,6 +63,13 @@
      <li class="nav-item">
       <a href="{{ path ('app_login')}}" class="nav-link">Se connecter</a>
     </li>>
+    <li class="nav-item">
+        <a href="{{ path('app_cart') }}" class="nav-link"><i class="fa-solid fa-cart-shopping" style="color: #cacacaff;"></i></a>
+    </li>
+    {% else %}
+      <li class="nav-item">
+        <a href="{{ path('app_cart') }}" class="nav-link"><i class="fa-solid fa-cart-shopping" style="color: #cacacaff;"></i></a>
+      </li>
   {% endif %}
   <!--Menu des commandes-->
   {% if is_granted("ROLE_EDITOR") %}

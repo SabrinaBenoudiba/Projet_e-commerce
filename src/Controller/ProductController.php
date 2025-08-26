@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Product;
 use App\Form\ProductType;
 use App\Entity\AddProductHistory;
+use App\Entity\User;
 use App\Form\AddProductHistoryType;
 use App\Form\ProductUpdateType;
 use App\Repository\AddProductHistoryRepository;
@@ -203,5 +204,4 @@ public function showHistoryProductStock($id, ProductRepository $productRepositor
 }
 #endregion
 }
-
 

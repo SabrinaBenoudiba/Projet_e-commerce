@@ -4,16 +4,18 @@ namespace App\Controller;
 
 use id;
 use App\Entity\User;
-use Doctrine\ORM\EntityManager;
+use App\Entity\Product;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\BrowserKit\Request;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_USER')]
 final class UserController extends AbstractController
 {
     #[Route('/admin/user', name: 'app_user')]
@@ -66,5 +68,30 @@ final class UserController extends AbstractController
         return $this->redirectToRoute('app_user');
     }
 
+    #region FAVORITES
+    #[Route('/user/add/product/{id}/favorites', name: 'app_product_favorites')]
+    public function toggleFavoritesProduct(Product $product, #[CurrentUser] User $user, EntityManagerInterface $em, Request $request): Response
+    {
+        if (!$user->getFavorites()->contains($product)) {
+        $user->addFavorite($product);
+        }else{
+        $user->removeFavorite($product);
+    }
+        $em->flush();
 
+     
+        return $this->redirect($request->headers->get('referer'));
+
+    }
+    #endregion FAVORITES
+
+    #region SHOW
+    #[Route('/user/show/favorites', name: 'app_product_favorites_show', methods: ['GET'])]
+    public function show(#[CurrentUser] User $user): Response
+    {   
+        return $this->render('user/my_favorites.html.twig', [
+            'products' => $user->getFavorites()
+        ]);
+    }
+    #endregion
 }

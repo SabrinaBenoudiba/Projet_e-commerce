@@ -39,7 +39,7 @@ security:
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/sub/category, roles: ROLE_ADMIN }
         - { path: ^/editor, roles: ROLE_EDITOR }
-        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/user, roles: ROLE_USER }
 
 when@test:
     security:

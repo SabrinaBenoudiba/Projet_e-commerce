@@ -49,11 +49,18 @@ class Product
     #[ORM\OneToMany(targetEntity: OrderProducts::class, mappedBy: 'product')]
     private Collection $orderProducts;
 
+    /**
+     * @var Collection<int, User>
+     */
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'favorites')]
+    private Collection $owners;
+
     public function __construct()
     {
         $this->subCategory = new ArrayCollection();
         $this->addProductHistory = new ArrayCollection();
         $this->orderProducts = new ArrayCollection();
+        $this->owners = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -200,6 +207,33 @@ class Product
             if ($orderProduct->getProduct() === $this) {
                 $orderProduct->setProduct(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getOwners(): Collection
+    {
+        return $this->owners;
+    }
+
+    public function addOwner(User $owner): static
+    {
+        if (!$this->owners->contains($owner)) {
+            $this->owners->add($owner);
+            $owner->addFavorite($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOwner(User $owner): static
+    {
+        if ($this->owners->removeElement($owner)) {
+            $owner->removeFavorite($this);
         }
 
         return $this;
