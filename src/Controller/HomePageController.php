@@ -17,6 +17,7 @@ final class HomePageController extends AbstractController
     #[Route('/', name: 'app_home_page', methods: ['GET'])]// methode Get on demande des infos au serveur et post pour envoyer des demandes au serveurs
     public function index(ProductRepository $productRepository, CategoryRepository $categoryRepository, Request $request, PaginatorInterface $paginator): Response
     {
+        // $this->addFlash("success", "test");
 
         $data = $productRepository->findby([],['id'=>"DESC"]);
         $products = $paginator->paginate(

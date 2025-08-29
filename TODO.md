@@ -8,6 +8,14 @@ W - Won't (have)
 
 ## TODO (exemple de fonctionnalités à ajouter articulées en tâches)
 - M : les mentions légales, contact Form, accessibilité pour les non voyants..., contraste des couleurs, (extension lighthouse), lier la table order à la table user (manyToOne)
+    - sur la NavBar attention il est noté 2 fois déconnecter lorsqu'il n'y a aucun utilisateur de connecté (modifier la fonction if else), on n'a plus besoin des commandes payées en ligne non livrée, remplacer par le click and collect
+    - finaliser la page my_favorites : message flash, tester les boutons supprimer, mettre au panier...
+    - sur le fichier editor/product faire en sorte de pouvoir aussi diminuer le stock, là je ne peux qu'en ajouter / lors de l'edition d'un produit faire en sorte de pouvoir modifier le stock
+    - sur le fichier editor/product/new déplacer le champs stock qui est actuellement positionné en dessous du boutton Ajouter 
+    - sur le fichier admin/user, faire en sorte que l'admin puisse ajouter un utilisateur
+    - sur le fichier du panier /cart : faire en sorte de pouvoir modifer la quantité et de pouvoir faire un ajout rapide au panier sans sortir de la page des produits.  
+    - nav-Bar : voir mes favoris (avec un coeur), mes commandes avec accès aux factures
+    - sur la page d'accueil des produits : pour les favoris mettre un coeur
 - S : README, Gestion du stock (limiter le stock, déduire le stock), génération des factures qu'une fois lorsque la commande est confirmé et qu'elle soit figée, navBar : ajouter city pour ajouter des ville pour les frais de livraisons...
 - Gestion du stock : 
     - update le stock à chaque achat :
